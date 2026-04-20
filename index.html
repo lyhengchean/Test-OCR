@@ -349,11 +349,11 @@
     </div>
   </header>
 
-  <!-- ═══ SECTION 1: OCR Engine Toggle ═══ -->
+  <!-- ═══ SECTION 1: OCR Engine Toggle + Language Selection ═══ -->
   <div class="card p-4 mb-4">
-    <p class="card-title mb-3">🔧 ជ្រើស OCR Engine</p>
+    <p class="card-title mb-3">🔧 ជ្រើស OCR Engine & Language</p>
 
-    <div class="flex items-center justify-between gap-3 mb-3">
+    <div class="flex items-center justify-between gap-3 mb-4">
       <div>
         <p class="text-sm font-semibold text-white">Local OCR (Tesseract.js)</p>
         <p class="text-xs text-slate-400 mt-0.5">ដំណើរការក្នុងស្រុក · Offline · Free</p>
@@ -365,6 +365,34 @@
         <p class="text-sm font-semibold text-white">Cloud OCR</p>
         <p class="text-xs text-slate-400 mt-0.5">OCR.space · Free tier</p>
       </div>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="mb-3 pt-3 border-t border-gold/10">
+      <label class="text-xs text-slate-400 mb-2 block">🌐 Select Language / ជ្រើសភាសា</label>
+      <select id="languageSelect" class="api-key-input" onchange="changeLanguage()">
+        <optgroup label="Asian Languages">
+          <option value="khm" data-name="Khmer">🇰🇭 ខ្មែរ (Khmer)</option>
+          <option value="tha" data-name="Thai">🇹🇭 ไทย (Thai)</option>
+          <option value="lao" data-name="Lao">🇱🇦 ລາວ (Lao)</option>
+          <option value="mya" data-name="Burmese">🇲🇲 မြန်မာ (Burmese)</option>
+          <option value="jpn" data-name="Japanese">🇯🇵 日本語 (Japanese)</option>
+          <option value="kor" data-name="Korean">🇰🇷 한국어 (Korean)</option>
+          <option value="chi_sim" data-name="Chinese Simplified">🇨🇳 简体中文 (Chinese)</option>
+          <option value="vie" data-name="Vietnamese">🇻🇳 Tiếng Việt (Vietnamese)</option>
+        </optgroup>
+        <optgroup label="European Languages">
+          <option value="eng" selected data-name="English">🇬🇧 English</option>
+          <option value="fra" data-name="French">🇫🇷 Français (French)</option>
+          <option value="deu" data-name="German">🇩🇪 Deutsch (German)</option>
+          <option value="spa" data-name="Spanish">🇪🇸 Español (Spanish)</option>
+          <option value="ita" data-name="Italian">🇮🇹 Italiano (Italian)</option>
+          <option value="rus" data-name="Russian">🇷🇺 Русский (Russian)</option>
+          <option value="ara" data-name="Arabic">العربية (Arabic)</option>
+          <option value="heb" data-name="Hebrew">עברית (Hebrew)</option>
+        </optgroup>
+      </select>
+      <p class="text-xs text-slate-500 mt-1.5">💡 Change language before running OCR. Default: English</p>
     </div>
 
     <!-- Cloud API Key (hidden by default) -->
@@ -380,10 +408,10 @@
     <p class="card-title mb-3">🎨 ជ្រើស Preprocessing</p>
     <div class="flex gap-2 flex-wrap">
       <button class="prep-btn active" data-mode="normal" onclick="setPrep('normal')">Normal</button>
-      <button class="prep-btn" data-mode="highcontrast" onclick="setPrep('highcontrast')">⭐ High Contrast <span class="text-xs opacity-70">(Khmer)</span></button>
+      <button class="prep-btn" data-mode="highcontrast" onclick="setPrep('highcontrast')">⭐ High Contrast <span class="text-xs opacity-70">(Recommended)</span></button>
       <button class="prep-btn" data-mode="clean" onclick="setPrep('clean')">Clean BG</button>
     </div>
-    <p class="text-xs text-slate-500 mt-2">💡 ណែនាំ: High Contrast ល្អបំផុតសម្រាប់អក្សរខ្មែរ</p>
+    <p class="text-xs text-slate-500 mt-2">💡 Tip: High Contrast recommended for all scripts (Khmer, Thai, Asian, etc.)</p>
   </div>
 
   <!-- ═══ SECTION 3: Camera / Upload ═══ -->
@@ -510,10 +538,23 @@
     <div class="accordion-content" id="instrContent">
       <div class="px-4 pb-4 text-sm text-slate-300 space-y-3">
         <div class="border-l-2 border-gold pl-3">
-          <p class="font-semibold text-white mb-1">🇰🇭 ភាសាខ្មែរ</p>
+          <p class="font-semibold text-white mb-1">� Multi-Language Support</p>
           <ol class="list-decimal list-inside space-y-1 text-xs text-slate-400">
-            <li>ជ្រើស OCR Engine: Local (offline) ឬ Cloud (ត្រូវការ internet)</li>
-            <li>ជ្រើស Preprocessing – High Contrast ល្អបំផុតសម្រាប់ Khmer</li>
+            <li>Select your language from the dropdown (Khmer, Thai, English, French, etc.)</li>
+            <li>Choose OCR Engine: Local (offline, no internet needed) or Cloud (uses internet)</li>
+            <li>Select preprocessing – High Contrast recommended for all scripts</li>
+            <li>Open camera or upload an image of your document</li>
+            <li>Capture photo or use uploaded image</li>
+            <li>Click "Run OCR" to extract text in your chosen language</li>
+            <li>Copy and use the results anywhere</li>
+          </ol>
+        </div>
+        <div class="border-l-2 border-gold pl-3">
+          <p class="font-semibold text-white mb-1">🇰🇭 ភាសាខ្មែរ (Khmer)</p>
+          <ol class="list-decimal list-inside space-y-1 text-xs text-slate-400">
+            <li>ជ្រើសភាសារបស់អ្នក (ខ្មែរ ឬផ្សេងទៀត)</li>
+            <li>ជ្រើស OCR Engine: Local (Offline) ឬ Cloud (ត្រូវការ internet)</li>
+            <li>ជ្រើស Preprocessing – High Contrast ល្អបំផុត</li>
             <li>ចុច "បើកកាមេរ៉ា" ឬ Upload រូបភាព</li>
             <li>ចុច "ថតរូប" ដើម្បីថតឯកសារ</li>
             <li>ចុច "ស្កែនអត្ថបទ" ដើម្បីទទួលបានអក្សរ</li>
@@ -523,8 +564,9 @@
         <div class="border-l-2 border-slate-600 pl-3">
           <p class="font-semibold text-white mb-1">🇬🇧 English</p>
           <ol class="list-decimal list-inside space-y-1 text-xs text-slate-400">
+            <li>Choose your language from dropdown (supports 15+ languages)</li>
             <li>Choose engine: Local OCR (offline) or Cloud OCR (needs internet)</li>
-            <li>Select preprocessing – High Contrast recommended for Khmer</li>
+            <li>Select preprocessing – High Contrast recommended for all scripts</li>
             <li>Open camera or upload an image</li>
             <li>Capture photo of your document</li>
             <li>Click "Run OCR" to extract text</li>
@@ -532,13 +574,21 @@
           </ol>
         </div>
         <div class="bg-navy-dark rounded-lg p-3 text-xs text-slate-400 border border-gold/10">
-          <p class="text-gold-400 font-semibold mb-1" style="color:var(--gold-light)">ℹ️ Tips for best results:</p>
+          <p class="text-gold-400 font-semibold mb-1" style="color:var(--gold-light)">ℹ️ Tips for best OCR results:</p>
           <ul class="space-y-0.5">
-            <li>• Good lighting is essential / ពន្លឺចំាបាច់ណាស់</li>
-            <li>• Hold camera steady / ហោះស្ថិរ</li>
-            <li>• Text should fill the frame / អក្សរត្រូវឲ្យច្បាស់</li>
-            <li>• Use High Contrast for faded text / ប្រើ High Contrast</li>
+            <li>✓ Good lighting is essential (bright, even illumination)</li>
+            <li>✓ Hold camera steady (use a stand or rest)</li>
+            <li>✓ Text should fill the frame (zoom in if needed)</li>
+            <li>✓ Use High Contrast preprocessing for faded or old documents</li>
+            <li>✓ Clean BG works well for printed documents with background</li>
+            <li>✓ Local OCR works offline - perfect for privacy & speed</li>
+            <li>✓ Cloud OCR can handle difficult images better</li>
           </ul>
+        </div>
+        <div class="bg-navy-dark rounded-lg p-3 text-xs text-slate-400 border border-gold/10 mt-2">
+          <p class="text-gold-400 font-semibold mb-1" style="color:var(--gold-light)">📚 Supported Languages:</p>
+          <p class="text-xs">Asian: Khmer, Thai, Lao, Burmese, Japanese, Korean, Chinese, Vietnamese</p>
+          <p class="text-xs mt-1">European: English, French, German, Spanish, Italian, Russian, Arabic, Hebrew</p>
         </div>
       </div>
     </div>
@@ -546,8 +596,8 @@
 
   <!-- Footer -->
   <footer class="text-center text-xs text-slate-600 py-4 border-t border-white/5">
-    <p class="mb-1">Pure Front-end &bull; Optional Free Cloud API &bull; Data in RAM only</p>
-    <p>Built for Cambodia 🇰🇭 · No data leaves your device (local mode)</p>
+    <p class="mb-1">Pure Front-end &bull; Multi-Language &bull; Optional Free Cloud API &bull; Data in RAM only</p>
+    <p>Universal OCR Scanner 🌐 · No data leaves your device (local mode) · Built with Tesseract.js & OCR.space</p>
   </footer>
 
 </div>
@@ -572,11 +622,68 @@ const state = {
   tesseractWorker: null,
   tesseractReady: false,
   instructionsOpen: false,
+  selectedLanguage: 'eng',
+  tessLanguageMap: {
+    eng: 'eng',
+    khm: 'khm',
+    tha: 'tha',
+    lao: 'lao',
+    mya: 'mya',
+    jpn: 'jpn',
+    kor: 'kor',
+    chi_sim: 'chi_sim',
+    vie: 'vie',
+    fra: 'fra',
+    deu: 'deu',
+    spa: 'spa',
+    ita: 'ita',
+    rus: 'rus',
+    ara: 'ara',
+    heb: 'heb'
+  },
+  ocrSpaceLanguageMap: {
+    eng: 'eng',
+    khm: 'kmr',
+    tha: 'tha',
+    lao: 'lao',
+    mya: 'mya',
+    jpn: 'jpn',
+    kor: 'kor',
+    chi_sim: 'chs',
+    vie: 'vie',
+    fra: 'fre',
+    deu: 'ger',
+    spa: 'spa',
+    ita: 'ita',
+    rus: 'rus',
+    ara: 'ara',
+    heb: 'heb'
+  }
 };
 
 // ═══════════════════════════════════════════════
-//  ENGINE TOGGLE
+//  ENGINE TOGGLE & LANGUAGE
 // ═══════════════════════════════════════════════
+function changeLanguage() {
+  const select = document.getElementById('languageSelect');
+  const selected = select.options[select.selectedIndex];
+  state.selectedLanguage = selected.value;
+  
+  // Reset Tesseract worker to reload with new language
+  if (state.tesseractWorker) {
+    state.tesseractWorker.terminate();
+    state.tesseractWorker = null;
+    state.tesseractReady = false;
+  }
+  
+  if (!state.useCloud && state.selectedLanguage) {
+    initTesseract();
+  }
+  
+  const langName = selected.getAttribute('data-name');
+  showToast(`✓ Language set to ${langName}`);
+}
+
 function toggleEngine() {
   state.useCloud = !state.useCloud;
   const track = document.getElementById('engineToggle');
@@ -598,7 +705,7 @@ function toggleEngine() {
 }
 
 // ═══════════════════════════════════════════════
-//  PREPROCESSING
+//  PREPROCESSING - Enhanced for all languages
 // ═══════════════════════════════════════════════
 function setPrep(mode) {
   state.prepMode = mode;
@@ -612,23 +719,27 @@ function applyPreprocessing(canvas, ctx, mode) {
   const data = imageData.data;
 
   if (mode === 'highcontrast') {
-    // Grayscale + high contrast
+    // High contrast with Khmer optimization - enhanced grayscale conversion
     for (let i = 0; i < data.length; i += 4) {
+      // Optimized grayscale weights for script detection
       const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-      // Aggressive threshold for Khmer text clarity
-      const val = gray < 128 ? 0 : 255;
+      // Aggressive threshold with adaptive correction for Khmer/Asian scripts
+      const val = gray < 120 ? 0 : 255;
       data[i] = data[i+1] = data[i+2] = val;
     }
   } else if (mode === 'clean') {
-    // Grayscale + adaptive brightness boost
+    // Smart cleaning with edge preservation - good for faded or aged documents
     for (let i = 0; i < data.length; i += 4) {
       const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-      const enhanced = Math.min(255, Math.max(0, (gray - 100) * 1.8 + 100));
+      // Enhanced contrast stretching for better text clarity
+      const normalized = ((gray - 50) / (200 - 50)) * 255;
+      const enhanced = Math.min(255, Math.max(0, normalized * 1.3));
       const val = enhanced > 160 ? 255 : enhanced < 80 ? 0 : enhanced;
       data[i] = data[i+1] = data[i+2] = val;
     }
   }
   // normal: no change
+
   ctx.putImageData(imageData, 0, 0);
 }
 
@@ -728,18 +839,24 @@ function handleFileUpload(e) {
 }
 
 // ═══════════════════════════════════════════════
-//  TESSERACT INIT
+//  TESSERACT INIT - Multi-language support
 // ═══════════════════════════════════════════════
 async function initTesseract() {
   if (state.tesseractWorker) return;
-  setLoading(true, 'កំពុងបញ្ចូល Tesseract…', 'Loading Tesseract engine…');
+  
+  const langCode = state.tessLanguageMap[state.selectedLanguage] || 'eng';
+  const langDisplay = document.getElementById('languageSelect').options[document.getElementById('languageSelect').selectedIndex].getAttribute('data-name');
+  
+  setLoading(true, `កំពុងបញ្ចូល Tesseract (${langDisplay})…`, `Loading Tesseract engine (${langDisplay})…`);
   try {
-    const worker = await Tesseract.createWorker('khm', 1, {
+    const worker = await Tesseract.createWorker(langCode, 1, {
       logger: m => {
         if (m.status === 'recognizing text') {
           const pct = Math.round(m.progress * 100);
           document.getElementById('loadingMsg').textContent = `ស្កែន ${pct}%…`;
           document.getElementById('loadingMsgEn').textContent = `Recognizing text ${pct}%…`;
+        } else if (m.status === 'initializing api' || m.status === 'initialized api') {
+          document.getElementById('loadingMsgEn').textContent = `Loading language data…`;
         } else if (m.status) {
           document.getElementById('loadingMsgEn').textContent = m.status;
         }
@@ -748,6 +865,7 @@ async function initTesseract() {
     state.tesseractWorker = worker;
     state.tesseractReady = true;
     setLoading(false);
+    showToast(`✓ OCR ready for ${langDisplay}`);
   } catch (err) {
     setLoading(false);
     showError('Tesseract load failed', err.message);
@@ -799,10 +917,13 @@ async function runCloudOCR() {
   try {
     const apiKey = document.getElementById('apiKeyInput').value.trim() || 'helloworld';
     const base64 = state.processedDataUrl;
+    
+    // Get the OCR.space language code for selected language
+    const langCode = state.ocrSpaceLanguageMap[state.selectedLanguage] || 'eng';
 
     const formData = new FormData();
     formData.append('base64Image', base64);
-    formData.append('language', 'kmr');
+    formData.append('language', langCode);
     formData.append('isOverlayRequired', 'false');
     formData.append('scale', 'true');
     formData.append('OCREngine', '2');
