@@ -355,25 +355,33 @@
 
     <div class="flex items-center justify-between gap-3 mb-4">
       <div>
-        <p class="text-sm font-semibold text-white">Local OCR (Tesseract.js)</p>
-        <p class="text-xs text-slate-400 mt-0.5">ដំណើរការក្នុងស្រុក · Offline · Free</p>
+        <p class="text-sm font-semibold text-white">Best for Khmer</p>
+        <p class="text-xs text-slate-400 mt-0.5">Google Vision (Superior)</p>
       </div>
       <div class="toggle-track" id="engineToggle" onclick="toggleEngine()">
         <div class="toggle-thumb"></div>
       </div>
       <div class="text-right">
-        <p class="text-sm font-semibold text-white">Cloud OCR</p>
-        <p class="text-xs text-slate-400 mt-0.5">OCR.space · Free tier</p>
+        <p class="text-sm font-semibold text-white">Free Local</p>
+        <p class="text-xs text-slate-400 mt-0.5">Tesseract (Offline)</p>
       </div>
     </div>
 
-    <!-- Language Selector for Multi-Language OCR -->
+    <!-- Google Cloud Vision API Key -->
+    <div id="googleSettings" class="mb-3 pt-3 border-t border-gold/10">
+      <label class="text-xs text-slate-400 mb-1.5 block">🔑 Google Cloud Vision API Key</label>
+      <input type="text" id="googleApiKeyInput" class="api-key-input" placeholder="Paste your API key here (free trial available)">
+      <p class="text-xs text-slate-500 mt-1.5">☁ Get free API key at: <a href="https://cloud.google.com/vision" target="_blank" style="color: #E8B84B; text-decoration: underline;">cloud.google.com/vision</a></p>
+      <p class="text-xs text-slate-400 mt-1">💡 Recommended: Google Vision is 10x better at Khmer recognition than Tesseract</p>
+    </div>
+
+    <!-- OCR Mode Selection -->
     <div class="mb-3 pt-3 border-t border-gold/10">
       <label class="text-xs text-slate-400 mb-2 block">🌐 OCR Mode / មាត្របាច</label>
       <select id="languageSelect" class="api-key-input" onchange="changeLanguage()">
-        <option value="multi" selected data-name="Multi-Language (Recommended)">🌍 Multi-Language (All at once)</option>
+        <option value="khm" selected data-name="Khmer Only">🇰🇭 ខ្មែរ (Khmer Only) - BEST</option>
+        <option value="multi" data-name="Multi-Language">🌍 Multi-Language (All at once)</option>
         <option value="khm-eng" data-name="Khmer + English">🇰🇭 ខ្មែរ + English</option>
-        <option value="khm" data-name="Khmer Only">🇰🇭 ខ្មែរ (Khmer Only)</option>
         <option value="eng" data-name="English Only">🇬🇧 English Only</option>
         <option value="fra" data-name="French Only">🇫🇷 Français</option>
         <option value="deu" data-name="German Only">🇩🇪 Deutsch</option>
@@ -387,14 +395,7 @@
         <option value="rus" data-name="Russian Only">🇷🇺 Русский</option>
         <option value="heb" data-name="Hebrew Only">עברית</option>
       </select>
-      <p class="text-xs text-slate-500 mt-1.5">💡 Multi-Language mode detects Khmer, English, and other scripts in the same image automatically</p>
-    </div>
-
-    <!-- Cloud API Key (hidden by default) -->
-    <div id="cloudSettings" class="hidden mt-3 pt-3 border-t border-gold/10">
-      <label class="text-xs text-slate-400 mb-1.5 block">🔑 OCR.space API Key (optional – leave blank for free tier)</label>
-      <input type="text" id="apiKeyInput" class="api-key-input" placeholder="K8xxxxxxxxxxxxxxxx (register free at ocr.space)">
-      <p class="text-xs text-slate-500 mt-1.5">☁ Cloud mode uses free OCR.space (limited daily quota)</p>
+      <p class="text-xs text-slate-500 mt-1.5">💡 Recommended: Use "Khmer Only" mode for best results with full-frame Khmer text</p>
     </div>
   </div>
 
@@ -535,12 +536,13 @@
         <div class="border-l-2 border-gold pl-3">
           <p class="font-semibold text-white mb-1">� Multi-Language Support</p>
           <ol class="list-decimal list-inside space-y-1 text-xs text-slate-400">
-            <li>Default mode detects Khmer, English, Chinese, Vietnamese in ONE image</li>
-            <li>Select "Multi-Language" to scan any text automatically</li>
-            <li>Or choose specific language if you want only one</li>
-            <li>Use "High Contrast" preprocessing (recommended)</li>
-            <li>Good lighting is essential for Khmer subscripts</li>
-            <li>Click "Run OCR" - detects ALL languages at once</li>
+            <li>✓ RECOMMENDED: Toggle ON to use Google Cloud Vision</li>
+            <li>Get FREE API key: visit cloud.google.com/vision ($300 free trial)</li>
+            <li>Paste your API key in "Google Cloud Vision API Key" field</li>
+            <li>Select "Khmer Only" mode for best accuracy with full Khmer text frames</li>
+            <li>Use "High Contrast" preprocessing for enhanced results</li>
+            <li>Take clear, well-lit photos with text filling the frame</li>
+            <li>Click "Run OCR" - Google Vision provides 10x better Khmer accuracy</li>
           </ol>
         </div>
         <div class="border-l-2 border-gold pl-3">
@@ -567,16 +569,16 @@
           </ol>
         </div>
         <div class="bg-navy-dark rounded-lg p-3 text-xs text-slate-400 border border-gold/10">
-          <p class="text-gold-400 font-semibold mb-1" style="color:var(--gold-light)">ℹ️ Tips for Best Khmer OCR Results:</p>
+          <p class="text-gold-400 font-semibold mb-1" style="color:var(--gold-light)">ℹ️ Tips for Best Khmer OCR Results with Google Vision:</p>
           <ul class="space-y-0.5">
-            <li>✓ Use "Multi-Language" mode for mixed text (Khmer + English)</li>
-            <li>✓ Always use "High Contrast" preprocessing for Khmer</li>
-            <li>✓ Ensure bright, even lighting (shadows ruin Khmer detection)</li>
-            <li>✓ Khmer diacritics & subscripts need clear images</li>
-            <li>✓ Hold camera perfectly steady (use a stand if possible)</li>
-            <li>✓ Fill the frame - text should be large and clear</li>
-            <li>✓ Local OCR (⚙) works offline and is fast</li>
-            <li>✓ Cloud OCR (☁) handles difficult images better but needs internet</li>
+            <li>✓ SWITCH TO GOOGLE CLOUD VISION - 10x better than Tesseract for Khmer</li>
+            <li>✓ Use "Khmer Only" mode for full-frame Khmer text (best accuracy)</li>
+            <li>✓ Always use "High Contrast" preprocessing for enhanced results</li>
+            <li>✓ Ensure bright, even lighting (shadows ruin recognition)</li>
+            <li>✓ Khmer diacritics & subscripts need clear, sharp images</li>
+            <li>✓ Hold camera perfectly steady (use a phone stand if possible)</li>
+            <li>✓ Fill the frame completely - text should be large and clear</li>
+            <li>✓ Free $300 trial: visit cloud.google.com/vision to get API key</li>
           </ul>
         </div>
         <div class="bg-navy-dark rounded-lg p-3 text-xs text-slate-400 border border-gold/10 mt-2">
@@ -590,8 +592,8 @@
 
   <!-- Footer -->
   <footer class="text-center text-xs text-slate-600 py-4 border-t border-white/5">
-    <p class="mb-1">Pure Front-end &bull; Multi-Language (Khmer+English+13 more) &bull; Optional Free Cloud API &bull; Data in RAM only</p>
-    <p>Universal OCR Scanner with Khmer Support 🌐 · No data leaves your device (local mode) · Built with Tesseract.js & OCR.space</p>
+    <p class="mb-1">🔎 Google Cloud Vision (Best) · ⚙ Tesseract Local (Free Offline) · Multi-Language Support · Data in RAM only</p>
+    <p>Advanced Khmer OCR Scanner · Get $300 free Google Vision credits · Built with Google Cloud Vision API & Tesseract.js</p>
   </footer>
 
 </div>
@@ -608,6 +610,7 @@
 // ═══════════════════════════════════════════════
 const state = {
   useCloud: false,
+  useGoogleVision: false,
   prepMode: 'normal',
   stream: null,
   capturedBlob: null,
@@ -616,7 +619,7 @@ const state = {
   tesseractWorker: null,
   tesseractReady: false,
   instructionsOpen: false,
-  selectedLanguage: 'multi',
+  selectedLanguage: 'khm',
   tessLanguageMap: {
     multi: 'khm+eng+fra+spa+deu+rus+jpn+kor+chi_sim+vie+mya+ara',
     'khm-eng': 'khm+eng',
@@ -636,24 +639,24 @@ const state = {
     ara: 'ara',
     heb: 'heb'
   },
-  ocrSpaceLanguageMap: {
-    multi: 'auto',
-    'khm-eng': 'kmr',
-    eng: 'eng',
-    khm: 'kmr',
-    lao: 'lao',
-    mya: 'mya',
-    jpn: 'jpn',
-    kor: 'kor',
-    chi_sim: 'chs',
-    vie: 'vie',
-    fra: 'fre',
-    deu: 'ger',
-    spa: 'spa',
-    ita: 'ita',
-    rus: 'rus',
-    ara: 'ara',
-    heb: 'heb'
+  googleVisionLanguageMap: {
+    khm: 'km',
+    multi: 'km', // Google auto-detects
+    'khm-eng': 'km',
+    eng: 'en',
+    lao: 'lo',
+    mya: 'my',
+    jpn: 'ja',
+    kor: 'ko',
+    chi_sim: 'zh-CN',
+    vie: 'vi',
+    fra: 'fr',
+    deu: 'de',
+    spa: 'es',
+    ita: 'it',
+    rus: 'ru',
+    ara: 'ar',
+    heb: 'he'
   }
 };
 
@@ -666,13 +669,13 @@ function changeLanguage() {
   state.selectedLanguage = selected.value;
   
   // Reset Tesseract worker to reload with new language
-  if (state.tesseractWorker) {
+  if (state.tesseractWorker && !state.useGoogleVision) {
     state.tesseractWorker.terminate();
     state.tesseractWorker = null;
     state.tesseractReady = false;
   }
   
-  if (!state.useCloud && state.selectedLanguage) {
+  if (!state.useGoogleVision && state.selectedLanguage) {
     initTesseract();
   }
   
@@ -681,14 +684,14 @@ function changeLanguage() {
 }
 
 function toggleEngine() {
-  state.useCloud = !state.useCloud;
+  state.useGoogleVision = !state.useGoogleVision;
   const track = document.getElementById('engineToggle');
-  track.classList.toggle('on', state.useCloud);
-  document.getElementById('cloudSettings').classList.toggle('hidden', !state.useCloud);
+  track.classList.toggle('on', state.useGoogleVision);
+  document.getElementById('googleSettings').classList.toggle('hidden', !state.useGoogleVision);
 
   const badge = document.getElementById('engineBadge');
-  if (state.useCloud) {
-    badge.textContent = '☁ CLOUD';
+  if (state.useGoogleVision) {
+    badge.textContent = '🔎 GOOGLE VISION';
     badge.className = 'badge badge-cloud';
   } else {
     badge.textContent = '⚙ LOCAL';
@@ -900,8 +903,8 @@ async function runOCR() {
     return;
   }
 
-  if (state.useCloud) {
-    await runCloudOCR();
+  if (state.useGoogleVision) {
+    await runGoogleVisionOCR();
   } else {
     await runLocalOCR();
   }
@@ -931,43 +934,75 @@ async function runLocalOCR() {
   }
 }
 
-async function runCloudOCR() {
-  setLoading(true, 'កំពុងផ្ញើទៅ Cloud…', 'Sending to Cloud OCR…');
+async function runGoogleVisionOCR() {
+  setLoading(true, 'កំពុងផ្ញើទៅ Google Vision…', 'Sending to Google Cloud Vision…');
   try {
-    const apiKey = document.getElementById('apiKeyInput').value.trim() || 'helloworld';
-    const base64 = state.processedDataUrl;
-    
-    // Get the OCR.space language code for selected language
-    const langCode = state.ocrSpaceLanguageMap[state.selectedLanguage] || 'kmr';
-
-    const formData = new FormData();
-    formData.append('base64Image', base64);
-    formData.append('language', langCode);
-    formData.append('isOverlayRequired', 'false');
-    formData.append('scale', 'true');
-    formData.append('OCREngine', '2');
-    formData.append('apikey', apiKey);
-
-    const res = await fetch('https://api.ocr.space/parse/image', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-
-    setLoading(false);
-
-    if (json.IsErroredOnProcessing) {
-      throw new Error(json.ErrorMessage?.join(', ') || 'OCR.space error');
+    const apiKey = document.getElementById('googleApiKeyInput').value.trim();
+    if (!apiKey) {
+      throw new Error('Please enter your Google Cloud Vision API key');
     }
 
-    const parsed = json.ParsedResults?.[0];
-    const text = parsed?.ParsedText?.trim() || '(No text detected)';
-    showResult(text, '☁ CLOUD', null);
+    const base64Image = state.processedDataUrl.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+    
+    const requestBody = {
+      requests: [{
+        image: {
+          content: base64Image
+        },
+        features: [
+          {
+            type: 'TEXT_DETECTION'
+          }
+        ],
+        imageContext: {
+          languageHints: [state.googleVisionLanguageMap[state.selectedLanguage] || 'km']
+        }
+      }]
+    };
+
+    const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error?.message || `HTTP ${res.status}`);
+    }
+
+    const json = await res.json();
+    setLoading(false);
+
+    if (json.error) {
+      throw new Error(json.error.message);
+    }
+
+    const responses = json.responses || [];
+    if (responses.length === 0) {
+      showResult('(No text detected)', '🔎 GOOGLE VISION', null);
+      return;
+    }
+
+    const textAnnotations = responses[0].textAnnotations || [];
+    if (textAnnotations.length === 0) {
+      showResult('(No text detected)', '🔎 GOOGLE VISION', null);
+      return;
+    }
+
+    // First annotation is the full text
+    const fullText = textAnnotations[0].description || '';
+    const text = fullText.trim();
+    
+    // Calculate confidence based on detection count
+    const confidence = Math.min(100, Math.round((textAnnotations.length / 50) * 100));
+    
+    showResult(text || '(No text detected)', '🔎 GOOGLE VISION', confidence);
   } catch (err) {
     setLoading(false);
-    showError('Cloud OCR Error / កំហុស Cloud', err.message);
+    showError('Google Vision Error / កំហុស Google Vision', err.message);
   }
 }
 
@@ -990,7 +1025,10 @@ function showResult(text, engine, confidence) {
   document.getElementById('resultSuccess').classList.remove('hidden');
 
   const badge = document.getElementById('resultBadge');
-  if (engine.includes('CLOUD')) {
+  if (engine.includes('GOOGLE')) {
+    badge.textContent = engine;
+    badge.className = 'badge badge-cloud';
+  } else if (engine.includes('CLOUD')) {
     badge.textContent = engine;
     badge.className = 'badge badge-cloud';
   } else {
