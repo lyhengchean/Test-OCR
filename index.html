@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700;900&family=Kantumruy+Pro:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/paddleocr@1.4.3/dist/paddle_ocr.min.js"></script>
 <style>
   :root {
     --gold: #C9972E;
@@ -262,6 +262,7 @@
   }
   .badge-local { background: rgba(90,122,153,0.25); color: #8BAEC7; border: 1px solid rgba(90,122,153,0.4); }
   .badge-cloud { background: rgba(155,35,53,0.25); color: #E07080; border: 1px solid rgba(155,35,53,0.4); }
+  .badge-paddle { background: rgba(34,197,94,0.2); color: #86EFAC; border: 1px solid rgba(34,197,94,0.5); font-weight: 700; }
   .badge-success { background: rgba(34,197,94,0.15); color: #4ADE80; border: 1px solid rgba(34,197,94,0.3); }
 
   /* Accordion (instructions) */
@@ -349,53 +350,32 @@
     </div>
   </header>
 
-  <!-- ═══ SECTION 1: OCR Engine Toggle + Language Selection ═══ -->
+  <!-- ═══ SECTION 1: PaddleOCR AI Engine ═══ -->
   <div class="card p-4 mb-4">
-    <p class="card-title mb-3">🔧 ជ្រើស OCR Engine & Language</p>
-
-    <div class="flex items-center justify-between gap-3 mb-4">
-      <div>
-        <p class="text-sm font-semibold text-white">Best for Khmer</p>
-        <p class="text-xs text-slate-400 mt-0.5">Google Vision (Superior)</p>
-      </div>
-      <div class="toggle-track" id="engineToggle" onclick="toggleEngine()">
-        <div class="toggle-thumb"></div>
-      </div>
-      <div class="text-right">
-        <p class="text-sm font-semibold text-white">Free Local</p>
-        <p class="text-xs text-slate-400 mt-0.5">Tesseract (Offline)</p>
-      </div>
+    <p class="card-title mb-3">🤖 AI Khmer Recognition (PaddleOCR)</p>
+    
+    <div class="mb-4 p-3 rounded bg-green-500/10 border border-green-500/30">
+      <p class="text-sm text-green-400 font-semibold">✅ FREE AI-Powered Khmer OCR</p>
+      <p class="text-xs text-slate-300 mt-1">🔹 Best accuracy for Khmer text · 🔹 Works offline · 🔹 No signup needed</p>
     </div>
 
-    <!-- Google Cloud Vision API Key -->
-    <div id="googleSettings" class="mb-3 pt-3 border-t border-gold/10">
-      <label class="text-xs text-slate-400 mb-1.5 block">🔑 Google Cloud Vision API Key</label>
-      <input type="text" id="googleApiKeyInput" class="api-key-input" placeholder="Paste your API key here (free trial available)">
-      <p class="text-xs text-slate-500 mt-1.5">☁ Get free API key at: <a href="https://cloud.google.com/vision" target="_blank" style="color: #E8B84B; text-decoration: underline;">cloud.google.com/vision</a></p>
-      <p class="text-xs text-slate-400 mt-1">💡 Recommended: Google Vision is 10x better at Khmer recognition than Tesseract</p>
-    </div>
-
-    <!-- OCR Mode Selection -->
-    <div class="mb-3 pt-3 border-t border-gold/10">
-      <label class="text-xs text-slate-400 mb-2 block">🌐 OCR Mode / មាត្របាច</label>
+    <!-- Language Selection -->
+    <div class="mb-3">
+      <label class="text-xs text-slate-400 mb-2 block">🌐 Select Language / ជ្រើស ភាសា</label>
       <select id="languageSelect" class="api-key-input" onchange="changeLanguage()">
-        <option value="khm" selected data-name="Khmer Only">🇰🇭 ខ្មែរ (Khmer Only) - BEST</option>
-        <option value="multi" data-name="Multi-Language">🌍 Multi-Language (All at once)</option>
-        <option value="khm-eng" data-name="Khmer + English">🇰🇭 ខ្មែរ + English</option>
-        <option value="eng" data-name="English Only">🇬🇧 English Only</option>
-        <option value="fra" data-name="French Only">🇫🇷 Français</option>
-        <option value="deu" data-name="German Only">🇩🇪 Deutsch</option>
-        <option value="spa" data-name="Spanish Only">🇪🇸 Español</option>
-        <option value="jpn" data-name="Japanese Only">🇯🇵 日本語</option>
-        <option value="kor" data-name="Korean Only">🇰🇷 한국어</option>
-        <option value="chi_sim" data-name="Chinese Only">🇨🇳 简体中文</option>
-        <option value="vie" data-name="Vietnamese Only">🇻🇳 Tiếng Việt</option>
-        <option value="mya" data-name="Burmese Only">🇲🇲 မြန်မာ</option>
-        <option value="ara" data-name="Arabic Only">العربية</option>
-        <option value="rus" data-name="Russian Only">🇷🇺 Русский</option>
-        <option value="heb" data-name="Hebrew Only">עברית</option>
+        <option value="khm" selected data-name="Khmer Only">🇰🇭 ខ្មែរ (Khmer) - BEST ⭐</option>
+        <option value="eng" data-name="English Only">🇬🇧 English</option>
+        <option value="khm-eng" data-name="Khmer + English">🇰🇭🇬🇧 ខ្មែរ + English</option>
+        <option value="chi_sim" data-name="Chinese Simplified">🇨🇳 简体中文 (Chinese)</option>
+        <option value="vie" data-name="Vietnamese">🇻🇳 Tiếng Việt</option>
+        <option value="jpn" data-name="Japanese">🇯🇵 日本語</option>
+        <option value="kor" data-name="Korean">🇰🇷 한국어</option>
+        <option value="ara" data-name="Arabic">العربية</option>
+        <option value="rus" data-name="Russian">🇷🇺 Русский</option>
+        <option value="fra" data-name="French">🇫🇷 Français</option>
+        <option value="deu" data-name="German">🇩🇪 Deutsch</option>
+        <option value="spa" data-name="Spanish">🇪🇸 Español</option>
       </select>
-      <p class="text-xs text-slate-500 mt-1.5">💡 Recommended: Use "Khmer Only" mode for best results with full-frame Khmer text</p>
     </div>
   </div>
 
@@ -609,96 +589,76 @@
 //  STATE
 // ═══════════════════════════════════════════════
 const state = {
-  useCloud: false,
-  useGoogleVision: false,
+  paddleOcrReady: false,
+  paddleOcr: null,
   prepMode: 'normal',
   stream: null,
   capturedBlob: null,
   processedDataUrl: null,
   originalDataUrl: null,
-  tesseractWorker: null,
-  tesseractReady: false,
   instructionsOpen: false,
   selectedLanguage: 'khm',
-  tessLanguageMap: {
-    multi: 'khm+eng+fra+spa+deu+rus+jpn+kor+chi_sim+vie+mya+ara',
-    'khm-eng': 'khm+eng',
-    eng: 'eng',
-    khm: 'khm',
-    lao: 'lao',
-    mya: 'mya',
-    jpn: 'jpn',
-    kor: 'kor',
-    chi_sim: 'chi_sim',
-    vie: 'vie',
-    fra: 'fra',
-    deu: 'deu',
-    spa: 'spa',
-    ita: 'ita',
-    rus: 'rus',
-    ara: 'ara',
-    heb: 'heb'
-  },
-  googleVisionLanguageMap: {
+  paddleLanguageMap: {
     khm: 'km',
-    multi: 'km', // Google auto-detects
-    'khm-eng': 'km',
     eng: 'en',
-    lao: 'lo',
-    mya: 'my',
+    'khm-eng': 'km',
+    chi_sim: 'ch',
+    vie: 'vi',
     jpn: 'ja',
     kor: 'ko',
-    chi_sim: 'zh-CN',
-    vie: 'vi',
+    ara: 'ar',
+    rus: 'ru',
     fra: 'fr',
     deu: 'de',
-    spa: 'es',
-    ita: 'it',
-    rus: 'ru',
-    ara: 'ar',
-    heb: 'he'
+    spa: 'es'
   }
 };
 
 // ═══════════════════════════════════════════════
-//  ENGINE TOGGLE & LANGUAGE
+//  LANGUAGE SELECTION
 // ═══════════════════════════════════════════════
 function changeLanguage() {
   const select = document.getElementById('languageSelect');
   const selected = select.options[select.selectedIndex];
   state.selectedLanguage = selected.value;
   
-  // Reset Tesseract worker to reload with new language
-  if (state.tesseractWorker && !state.useGoogleVision) {
-    state.tesseractWorker.terminate();
-    state.tesseractWorker = null;
-    state.tesseractReady = false;
-  }
-  
-  if (!state.useGoogleVision && state.selectedLanguage) {
-    initTesseract();
+  // Initialize PaddleOCR if not ready
+  if (!state.paddleOcrReady) {
+    initPaddleOcr();
   }
   
   const langName = selected.getAttribute('data-name');
-  showToast(`✓ OCR Mode: ${langName}`);
+  showToast(`✅ Language: ${langName}`);
 }
 
-function toggleEngine() {
-  state.useGoogleVision = !state.useGoogleVision;
-  const track = document.getElementById('engineToggle');
-  track.classList.toggle('on', state.useGoogleVision);
-  document.getElementById('googleSettings').classList.toggle('hidden', !state.useGoogleVision);
+// ═══════════════════════════════════════════════
+//  PADDLEOCR INITIALIZATION
+// ═══════════════════════════════════════════════
+async function initPaddleOcr() {
+  if (state.paddleOcrReady) return;
+  
+  setLoading(true, 'កំពុងដំណើរការ PaddleOCR AI...', 'Initializing PaddleOCR AI...');
+  try {
+    // PaddleOCR.js is loaded globally
+    if (typeof PaddleOCR === 'undefined') {
+      throw new Error('PaddleOCR library not loaded');
+    }
+    
+    state.paddleOcr = new PaddleOCR();
+    await state.paddleOcr.init();
+    state.paddleOcrReady = true;
+    setLoading(false);
+    showToast('✅ PaddleOCR ready for scanning!');
+  } catch (err) {
+    setLoading(false);
+    showError('🚨 PaddleOCR Init Error', err.message);
+    console.error(err);
+  }
+}
 
-  const badge = document.getElementById('engineBadge');
-  if (state.useGoogleVision) {
-    badge.textContent = '🔎 GOOGLE VISION';
-    badge.className = 'badge badge-cloud';
-  } else {
-    badge.textContent = '⚙ LOCAL';
-    badge.className = 'badge badge-local';
-    // Pre-init tesseract if not done
-    if (!state.tesseractReady && !state.tesseractWorker) {
-      initTesseract();
+// ═══════════════════════════════════════════════
+//  ENGINE TOGGLE & LANGUAGE
+// ═══════════════════════════════════════════════
     }
   }
 }
@@ -860,42 +820,7 @@ function handleFileUpload(e) {
 }
 
 // ═══════════════════════════════════════════════
-//  TESSERACT INIT - Multi-language support with Khmer
-// ═══════════════════════════════════════════════
-async function initTesseract() {
-  if (state.tesseractWorker) return;
-  
-  const langCode = state.tessLanguageMap[state.selectedLanguage] || 'khm+eng';
-  const langDisplay = document.getElementById('languageSelect').options[document.getElementById('languageSelect').selectedIndex].getAttribute('data-name');
-  
-  setLoading(true, `កំពុងបញ្ចូល Tesseract (${langDisplay})…`, `Loading Tesseract (${langDisplay})…`);
-  try {
-    // Create worker with multiple languages for better detection
-    const worker = await Tesseract.createWorker(langCode, 1, {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          const pct = Math.round(m.progress * 100);
-          document.getElementById('loadingMsg').textContent = `ស្កែន ${pct}%…`;
-          document.getElementById('loadingMsgEn').textContent = `Scanning ${pct}%…`;
-        } else if (m.status === 'initializing api' || m.status === 'initialized api') {
-          document.getElementById('loadingMsgEn').textContent = `Loading language models…`;
-        } else if (m.status) {
-          document.getElementById('loadingMsgEn').textContent = m.status;
-        }
-      }
-    });
-    state.tesseractWorker = worker;
-    state.tesseractReady = true;
-    setLoading(false);
-    showToast(`✓ Ready for ${langDisplay}`);
-  } catch (err) {
-    setLoading(false);
-    showError('Tesseract Error / កំហុស Tesseract', err.message);
-  }
-}
-
-// ═══════════════════════════════════════════════
-//  OCR
+//  OCR - PADDLEOCR AI ENGINE
 // ═══════════════════════════════════════════════
 async function runOCR() {
   if (!state.processedDataUrl && !state.capturedBlob) {
@@ -903,11 +828,17 @@ async function runOCR() {
     return;
   }
 
-  if (state.useGoogleVision) {
-    await runGoogleVisionOCR();
-  } else {
-    await runLocalOCR();
+  // Initialize PaddleOCR if needed
+  if (!state.paddleOcrReady) {
+    await initPaddleOcr();
   }
+  
+  if (!state.paddleOcrReady) {
+    showError('❌ PaddleOCR Not Ready', 'Failed to initialize OCR engine');
+    return;
+  }
+
+  await runPaddleOCR();
 }
 
 async function rerunOCR() {
@@ -915,94 +846,52 @@ async function rerunOCR() {
   await runOCR();
 }
 
-async function runLocalOCR() {
-  setLoading(true, 'កំពុងដំណើរការ OCR…', 'Running local Tesseract OCR…');
+async function runPaddleOCR() {
+  setLoading(true, 'កំពុងស្កែនអក្សរខ្មែរ...', 'Scanning Khmer text with AI...');
   try {
-    if (!state.tesseractWorker) {
-      await initTesseract();
-    }
-    if (!state.tesseractWorker) return;
-
-    const { data } = await state.tesseractWorker.recognize(state.processedDataUrl);
-    setLoading(false);
-
-    const text = data.text.trim();
-    showResult(text || '(No text detected / មិនរកឃើញអក្សរ)', '⚙ LOCAL', data.confidence);
-  } catch (err) {
-    setLoading(false);
-    showError('Local OCR failed', err.message);
-  }
-}
-
-async function runGoogleVisionOCR() {
-  setLoading(true, 'កំពុងផ្ញើទៅ Google Vision…', 'Sending to Google Cloud Vision…');
-  try {
-    const apiKey = document.getElementById('googleApiKeyInput').value.trim();
-    if (!apiKey) {
-      throw new Error('Please enter your Google Cloud Vision API key');
-    }
-
-    const base64Image = state.processedDataUrl.split(',')[1]; // Remove data:image/jpeg;base64, prefix
-    
-    const requestBody = {
-      requests: [{
-        image: {
-          content: base64Image
-        },
-        features: [
-          {
-            type: 'TEXT_DETECTION'
-          }
-        ],
-        imageContext: {
-          languageHints: [state.googleVisionLanguageMap[state.selectedLanguage] || 'km']
+    // Get the processed image
+    const img = new Image();
+    img.onload = async () => {
+      try {
+        // Run PaddleOCR recognition
+        const result = await state.paddleOcr.recognize(img);
+        setLoading(false);
+        
+        // Extract text from results
+        let extractedText = '';
+        if (result && result.data) {
+          extractedText = result.data.map(line => 
+            line.text || ''
+          ).filter(text => text.trim()).join('\n');
         }
-      }]
+        
+        // Calculate confidence (average of all detections)
+        let confidence = null;
+        if (result && result.data && result.data.length > 0) {
+          const confidences = result.data.map(line => line.confidence || 0);
+          confidence = Math.round((confidences.reduce((a, b) => a + b, 0) / confidences.length) * 100);
+        }
+        
+        showResult(
+          extractedText.trim() || '(No text detected / មិនរកឃើញអក្សរ)', 
+          '🤖 PADDLE OCR', 
+          confidence
+        );
+      } catch (innerErr) {
+        setLoading(false);
+        showError('❌ Recognition Failed', innerErr.message);
+        console.error(innerErr);
+      }
     };
-
-    const res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error?.message || `HTTP ${res.status}`);
-    }
-
-    const json = await res.json();
-    setLoading(false);
-
-    if (json.error) {
-      throw new Error(json.error.message);
-    }
-
-    const responses = json.responses || [];
-    if (responses.length === 0) {
-      showResult('(No text detected)', '🔎 GOOGLE VISION', null);
-      return;
-    }
-
-    const textAnnotations = responses[0].textAnnotations || [];
-    if (textAnnotations.length === 0) {
-      showResult('(No text detected)', '🔎 GOOGLE VISION', null);
-      return;
-    }
-
-    // First annotation is the full text
-    const fullText = textAnnotations[0].description || '';
-    const text = fullText.trim();
-    
-    // Calculate confidence based on detection count
-    const confidence = Math.min(100, Math.round((textAnnotations.length / 50) * 100));
-    
-    showResult(text || '(No text detected)', '🔎 GOOGLE VISION', confidence);
+    img.onerror = () => {
+      setLoading(false);
+      showError('❌ Image Loading Failed', 'Could not load image for processing');
+    };
+    img.src = state.processedDataUrl;
   } catch (err) {
     setLoading(false);
-    showError('Google Vision Error / កំហុស Google Vision', err.message);
+    showError('❌ OCR Error', err.message);
+    console.error(err);
   }
 }
 
@@ -1025,14 +914,10 @@ function showResult(text, engine, confidence) {
   document.getElementById('resultSuccess').classList.remove('hidden');
 
   const badge = document.getElementById('resultBadge');
-  if (engine.includes('GOOGLE')) {
-    badge.textContent = engine;
-    badge.className = 'badge badge-cloud';
-  } else if (engine.includes('CLOUD')) {
-    badge.textContent = engine;
-    badge.className = 'badge badge-cloud';
+  badge.textContent = engine;
+  if (engine.includes('PADDLE')) {
+    badge.className = 'badge badge-paddle';
   } else {
-    badge.textContent = engine;
     badge.className = 'badge badge-local';
   }
 
@@ -1110,9 +995,9 @@ function toggleInstructions() {
 //  INIT
 // ═══════════════════════════════════════════════
 (function init() {
-  // Pre-warm Tesseract in background after small delay
+  // Pre-warm PaddleOCR in background after small delay
   setTimeout(() => {
-    if (!state.useCloud) initTesseract();
+    initPaddleOcr();
   }, 1500);
 })();
 </script>
