@@ -1,286 +1,942 @@
 <!DOCTYPE html>
 <html lang="km">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ឧបករណ៍ស្កេនអក្សរខ្មែរ - Khmer OCR</title>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: system-ui, -apple-system, 'Noto Sans Khmer', sans-serif; }
-    video, canvas, img { max-width: 100%; border-radius: 12px; }
-    #status { font-size: 0.95rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ស្កែនអក្សរខ្មែរ · Khmer OCR Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700;900&family=Kantumruy+Pro:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+  :root {
+    --gold: #C9972E;
+    --gold-light: #E8B84B;
+    --gold-pale: #FDF3DC;
+    --crimson: #9B2335;
+    --crimson-light: #C42B3F;
+    --navy: #0E1B2E;
+    --navy-mid: #162338;
+    --navy-light: #1E3050;
+    --slate: #5A7A99;
+    --cream: #FBF8F2;
+    --text-main: #1A1208;
+    --text-muted: #6B5E4A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'Kantumruy Pro', 'Hanuman', sans-serif;
+    background: var(--navy);
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Decorative background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(201,151,46,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(155,35,53,0.10) 0%, transparent 60%),
+      linear-gradient(180deg, #0E1B2E 0%, #0A1420 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app-wrapper { position: relative; z-index: 1; }
+
+  /* Header */
+  .app-header {
+    background: linear-gradient(135deg, var(--navy-mid) 0%, var(--navy-light) 100%);
+    border-bottom: 2px solid var(--gold);
+    box-shadow: 0 4px 24px rgba(201,151,46,0.15);
+  }
+
+  .logo-emblem {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Hanuman', serif;
+    font-size: 22px; font-weight: 900;
+    color: var(--navy);
+    box-shadow: 0 4px 16px rgba(201,151,46,0.4);
+    flex-shrink: 0;
+  }
+
+  /* Cards */
+  .card {
+    background: rgba(22, 35, 56, 0.85);
+    border: 1px solid rgba(201,151,46,0.2);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: rgba(201,151,46,0.4); }
+
+  .card-title {
+    font-family: 'Hanuman', serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  /* Toggle Switch */
+  .toggle-track {
+    width: 52px; height: 28px;
+    background: var(--slate);
+    border-radius: 14px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .toggle-track.on { background: var(--gold); }
+  .toggle-thumb {
+    width: 22px; height: 22px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px; left: 3px;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .toggle-track.on .toggle-thumb { transform: translateX(24px); }
+
+  /* Preprocess Options */
+  .prep-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(201,151,46,0.25);
+    background: rgba(14,27,46,0.6);
+    color: rgba(251,248,242,0.7);
+    font-size: 12px;
+    font-family: 'Kantumruy Pro', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .prep-btn:hover { border-color: var(--gold); color: var(--gold-light); }
+  .prep-btn.active {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    color: var(--navy);
+    border-color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* Camera area */
+  .camera-container {
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 4/3;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #videoEl {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  .camera-overlay {
+    position: absolute; inset: 0;
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .camera-corner {
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--gold);
+    border-style: solid;
+    opacity: 0.8;
+  }
+  .camera-corner.tl { top:12px;left:12px; border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
+  .camera-corner.tr { top:12px;right:12px; border-width:2px 2px 0 0; border-radius:0 4px 0 0; }
+  .camera-corner.bl { bottom:12px;left:12px; border-width:0 0 2px 2px; border-radius:0 0 0 4px; }
+  .camera-corner.br { bottom:12px;right:12px; border-width:0 2px 2px 0; border-radius:0 0 4px 0; }
+
+  /* Buttons */
+  .btn-capture {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    color: var(--navy);
+    font-weight: 700;
+    font-family: 'Hanuman', serif;
+    font-size: 16px;
+    padding: 14px 28px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(201,151,46,0.4);
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-capture:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,151,46,0.5); }
+  .btn-capture:active { transform: translateY(0); }
+  .btn-capture:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: rgba(90,122,153,0.2);
+    color: var(--cream);
+    font-family: 'Kantumruy Pro', sans-serif;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(90,122,153,0.4);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-secondary:hover { background: rgba(90,122,153,0.35); border-color: var(--slate); }
+
+  .btn-copy {
+    background: linear-gradient(135deg, var(--crimson) 0%, var(--crimson-light) 100%);
+    color: white;
+    font-family: 'Kantumruy Pro', sans-serif;
+    font-size: 13px; font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(155,35,53,0.35);
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-copy:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(155,35,53,0.45); }
+
+  /* Image previews */
+  .img-preview {
+    width: 100%; border-radius: 10px;
+    border: 1px solid rgba(201,151,46,0.2);
+    object-fit: contain;
+    max-height: 200px;
+    background: #000;
+  }
+
+  /* OCR Text output */
+  .ocr-output {
+    font-family: 'Hanuman', 'Kantumruy Pro', serif;
+    font-size: 18px;
+    line-height: 2;
+    color: var(--cream);
+    background: rgba(14,27,46,0.8);
+    border: 1px solid rgba(201,151,46,0.3);
+    border-radius: 12px;
+    padding: 16px;
+    min-height: 100px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Loading */
+  .loading-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 2px;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(201,151,46,0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .badge-local { background: rgba(90,122,153,0.25); color: #8BAEC7; border: 1px solid rgba(90,122,153,0.4); }
+  .badge-cloud { background: rgba(155,35,53,0.25); color: #E07080; border: 1px solid rgba(155,35,53,0.4); }
+  .badge-success { background: rgba(34,197,94,0.15); color: #4ADE80; border: 1px solid rgba(34,197,94,0.3); }
+
+  /* Accordion (instructions) */
+  .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .accordion-content.open { max-height: 800px; }
+  .accordion-arrow { transition: transform 0.3s; }
+  .accordion-arrow.open { transform: rotate(180deg); }
+
+  /* API Key input */
+  .api-key-input {
+    background: rgba(14,27,46,0.8);
+    border: 1px solid rgba(201,151,46,0.2);
+    border-radius: 8px;
+    padding: 9px 14px;
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .api-key-input:focus { outline: none; border-color: var(--gold); }
+  .api-key-input::placeholder { color: rgba(251,248,242,0.3); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: rgba(22,35,56,0.95);
+    border: 1px solid var(--gold);
+    color: var(--cream);
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 13px;
+    backdrop-filter: blur(12px);
+    transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999;
+    white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* File upload zone */
+  .upload-zone {
+    border: 2px dashed rgba(201,151,46,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .upload-zone:hover { border-color: var(--gold); background: rgba(201,151,46,0.05); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,151,46,0.4); border-radius: 3px; }
+
+  /* Confidence meter */
+  .conf-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+  .conf-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
+
+  /* Pulse on camera active */
+  @keyframes pulse-gold {
+    0%,100% { box-shadow: 0 0 0 0 rgba(201,151,46,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(201,151,46,0); }
+  }
+  .camera-live { animation: pulse-gold 2s infinite; }
+
+  input[type="file"] { display: none; }
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen pb-8">
-  <div class="max-w-2xl mx-auto p-4">
-    <h1 class="text-3xl font-bold text-center text-indigo-700 mb-1">ឧបករណ៍ស្កេនអក្សរខ្មែរ</h1>
-    <p class="text-center text-gray-600 mb-6">Pure Front-end • Temporary RAM only</p>
+<body>
+<div class="app-wrapper max-w-lg mx-auto px-4 pb-16">
 
-    <!-- Camera Section -->
-    <div class="bg-white rounded-3xl shadow p-5 mb-6">
-      <button id="startBtn" 
-              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-2xl text-lg active:scale-95 transition">
-        📷 បើកកាមេរ៉ា (Open Camera)
-      </button>
+  <!-- Header -->
+  <header class="app-header -mx-4 px-4 py-4 mb-5 sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="logo-emblem">ក</div>
+      <div>
+        <h1 class="font-['Hanuman'] font-black text-lg leading-tight text-white">ស្កែនអក្សរខ្មែរ</h1>
+        <p class="text-xs text-slate-400 mt-0.5">Khmer OCR Scanner</p>
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <span id="engineBadge" class="badge badge-local">⚙ LOCAL</span>
+      </div>
+    </div>
+  </header>
 
-      <div id="cameraContainer" class="hidden mt-5">
-        <div class="relative bg-black rounded-2xl overflow-hidden">
-          <video id="video" autoplay playsinline class="w-full"></video>
-        </div>
-        <div class="flex gap-3 mt-5">
-          <button id="captureBtn" 
-                  class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl text-lg active:scale-95 transition">
-            📸 ថតនិងស្កេន (Capture & Scan)
-          </button>
-          <button id="stopBtn" 
-                  class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-4 rounded-2xl text-lg active:scale-95 transition">
-            បិទ (Stop Camera)
-          </button>
-        </div>
+  <!-- ═══ SECTION 1: OCR Engine Toggle ═══ -->
+  <div class="card p-4 mb-4">
+    <p class="card-title mb-3">🔧 ជ្រើស OCR Engine</p>
+
+    <div class="flex items-center justify-between gap-3 mb-3">
+      <div>
+        <p class="text-sm font-semibold text-white">Local OCR (Tesseract.js)</p>
+        <p class="text-xs text-slate-400 mt-0.5">ដំណើរការក្នុងស្រុក · Offline · Free</p>
+      </div>
+      <div class="toggle-track" id="engineToggle" onclick="toggleEngine()">
+        <div class="toggle-thumb"></div>
+      </div>
+      <div class="text-right">
+        <p class="text-sm font-semibold text-white">Cloud OCR</p>
+        <p class="text-xs text-slate-400 mt-0.5">OCR.space · Free tier</p>
       </div>
     </div>
 
-    <!-- Result Section -->
-    <div id="resultSection" class="hidden bg-white rounded-3xl shadow p-6">
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <p class="text-xs uppercase tracking-widest text-gray-500 mb-1">Original</p>
-          <img id="originalImg" class="w-full rounded-xl border border-gray-200">
-        </div>
-        <div>
-          <p class="text-xs uppercase tracking-widest text-gray-500 mb-1">Processed</p>
-          <img id="processedImg" class="w-full rounded-xl border border-gray-200">
-        </div>
-      </div>
-
-      <div class="mb-5">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Preprocessing Mode:</label>
-        <select id="preprocessMode" class="w-full border border-gray-300 rounded-2xl px-5 py-3 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <option value="normal">Normal</option>
-          <option value="highcontrast" selected>High Contrast (Recommended for Khmer)</option>
-          <option value="clean">Clean Background</option>
-        </select>
-      </div>
-
-      <div id="loading" class="hidden py-10 text-center">
-        <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
-        <p id="status" class="mt-4 text-indigo-700 font-medium">កំពុងទាញយកម៉ូដែល និងស្កេនអក្សរ... (Loading model & scanning)</p>
-      </div>
-
-      <div id="resultBox" class="hidden">
-        <p class="text-sm text-gray-500 mb-2">អត្ថបទដែលបានស្គាល់ (Recognized Khmer Text)</p>
-        <div id="recognizedText" 
-             class="bg-gray-50 border border-gray-300 rounded-2xl p-6 text-xl leading-relaxed min-h-[140px] whitespace-pre-wrap break-words"></div>
-
-        <div class="flex gap-3 mt-8">
-          <button id="copyBtn"
-                  class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl text-lg active:scale-95 transition flex items-center justify-center gap-2">
-            📋 ចម្លងអត្ថបទ (Copy)
-          </button>
-          <button id="clearBtn"
-                  class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 rounded-2xl text-lg active:scale-95 transition">
-            លុបឡើងវិញ (Clear)
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="text-center text-[10px] text-gray-500 mt-10">
-      Khmer OCR • Tesseract.js v5.1.1 • Data stored only in browser RAM
+    <!-- Cloud API Key (hidden by default) -->
+    <div id="cloudSettings" class="hidden mt-3 pt-3 border-t border-gold/10">
+      <label class="text-xs text-slate-400 mb-1.5 block">🔑 OCR.space API Key (optional – leave blank for free tier)</label>
+      <input type="text" id="apiKeyInput" class="api-key-input" placeholder="K8xxxxxxxxxxxxxxxx (register free at ocr.space)">
+      <p class="text-xs text-slate-500 mt-1.5">☁ Cloud mode uses free OCR.space (limited daily quota)</p>
     </div>
   </div>
 
-  <script>
-    // Elements
-    const video = document.getElementById('video');
-    const startBtn = document.getElementById('startBtn');
-    const captureBtn = document.getElementById('captureBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const cameraContainer = document.getElementById('cameraContainer');
-    const resultSection = document.getElementById('resultSection');
-    const originalImg = document.getElementById('originalImg');
-    const processedImg = document.getElementById('processedImg');
-    const recognizedTextEl = document.getElementById('recognizedText');
-    const loading = document.getElementById('loading');
-    const statusText = document.getElementById('status');
-    const resultBox = document.getElementById('resultBox');
-    const preprocessMode = document.getElementById('preprocessMode');
-    const copyBtn = document.getElementById('copyBtn');
-    const clearBtn = document.getElementById('clearBtn');
+  <!-- ═══ SECTION 2: Preprocessing ═══ -->
+  <div class="card p-4 mb-4">
+    <p class="card-title mb-3">🎨 ជ្រើស Preprocessing</p>
+    <div class="flex gap-2 flex-wrap">
+      <button class="prep-btn active" data-mode="normal" onclick="setPrep('normal')">Normal</button>
+      <button class="prep-btn" data-mode="highcontrast" onclick="setPrep('highcontrast')">⭐ High Contrast <span class="text-xs opacity-70">(Khmer)</span></button>
+      <button class="prep-btn" data-mode="clean" onclick="setPrep('clean')">Clean BG</button>
+    </div>
+    <p class="text-xs text-slate-500 mt-2">💡 ណែនាំ: High Contrast ល្អបំផុតសម្រាប់អក្សរខ្មែរ</p>
+  </div>
 
-    let stream = null;
-    let worker = null;
+  <!-- ═══ SECTION 3: Camera / Upload ═══ -->
+  <div class="card p-4 mb-4">
+    <p class="card-title mb-3">📷 ថត / Upload</p>
 
-    // Initialize Tesseract Worker (with better error handling)
-    async function initTesseract() {
-      if (worker) return worker;
-      
-      statusText.textContent = "កំពុងទាញយកម៉ូដែលខ្មែរ... (Downloading Khmer model - first time only)";
-      loading.classList.remove('hidden');
+    <!-- Camera view -->
+    <div class="camera-container mb-3" id="cameraBox">
+      <div class="text-slate-500 text-center px-6" id="cameraPlaceholder">
+        <div class="text-4xl mb-2">📷</div>
+        <p class="text-sm">ចុច "បើកកាមេរ៉ា" ដើម្បីចាប់ផ្តើម</p>
+        <p class="text-xs mt-1 opacity-60">Open Camera to start scanning</p>
+      </div>
+      <video id="videoEl" autoplay playsinline muted style="display:none"></video>
+      <div class="camera-overlay" id="cameraOverlay" style="display:none">
+        <div class="camera-corner tl"></div>
+        <div class="camera-corner tr"></div>
+        <div class="camera-corner bl"></div>
+        <div class="camera-corner br"></div>
+      </div>
+    </div>
 
-      try {
-        worker = await Tesseract.createWorker('khm', 1, {
-          logger: (m) => {
-            if (m.status === 'recognizing text') {
-              statusText.textContent = `ស្កេន... ${Math.round(m.progress * 100)}%`;
-            }
-          }
-        });
-        return worker;
-      } catch (err) {
-        console.error("Worker init failed:", err);
-        alert("មិនអាចចាប់ផ្តើម OCR បានទេ។ សូមព្យាយាម refresh ទំព័រ។\nFailed to start OCR engine. Try refreshing the page.");
-        loading.classList.add('hidden');
-        throw err;
-      }
+    <!-- Camera Controls -->
+    <div class="flex gap-2 flex-wrap justify-center mb-3">
+      <button class="btn-capture" id="btnOpenCam" onclick="openCamera()">
+        <span>📷</span> <span>បើកកាមេរ៉ា</span>
+      </button>
+      <button class="btn-capture hidden" id="btnCapture" onclick="capturePhoto()">
+        <span>⚡</span> <span>ថតរូប</span>
+      </button>
+    </div>
+
+    <div class="flex gap-2 justify-center">
+      <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">
+        <span>🖼</span> Upload Image
+      </button>
+      <button class="btn-secondary hidden" id="btnStopCam" onclick="stopCamera()">
+        <span>⏹</span> Stop Camera
+      </button>
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)">
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 4: Image Previews ═══ -->
+  <div id="previewSection" class="hidden">
+    <div class="card p-4 mb-4">
+      <p class="card-title mb-3">🖼 Image Preview</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <p class="text-xs text-slate-400 mb-1.5">Original</p>
+          <img id="imgOriginal" class="img-preview" alt="Original">
+        </div>
+        <div>
+          <p class="text-xs text-slate-400 mb-1.5">Processed</p>
+          <img id="imgProcessed" class="img-preview" alt="Processed">
+        </div>
+      </div>
+      <div class="mt-3 flex justify-center">
+        <button class="btn-capture" id="btnRunOCR" onclick="runOCR()">
+          <span>🔍</span> <span>ស្កែនអត្ថបទ / Run OCR</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 5: Loading ═══ -->
+  <div id="loadingSection" class="hidden card p-4 mb-4">
+    <div class="loading-bar mb-4 rounded-full"></div>
+    <div class="flex items-center gap-3">
+      <div class="spinner"></div>
+      <div>
+        <p class="text-sm font-semibold text-white" id="loadingMsg">កំពុងដំណើរការ…</p>
+        <p class="text-xs text-slate-400" id="loadingMsgEn">Processing, please wait…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 6: OCR Results ═══ -->
+  <div id="resultSection" class="hidden">
+    <div class="card p-4 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="card-title">📄 លទ្ធផល / Result</p>
+        <div class="flex items-center gap-2">
+          <span id="resultBadge" class="badge badge-local">⚙ LOCAL</span>
+          <span id="resultSuccess" class="badge badge-success hidden">✓ Done</span>
+        </div>
+      </div>
+
+      <!-- Confidence -->
+      <div id="confSection" class="hidden mb-3">
+        <div class="flex justify-between text-xs text-slate-400 mb-1">
+          <span>Confidence</span>
+          <span id="confValue">—</span>
+        </div>
+        <div class="conf-bar">
+          <div class="conf-fill bg-gradient-to-r from-yellow-600 to-yellow-400" id="confFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="ocr-output mb-4" id="ocrText">—</div>
+
+      <div class="flex gap-2 flex-wrap">
+        <button class="btn-copy" onclick="copyText()">
+          <span>📋</span> Copy Text
+        </button>
+        <button class="btn-secondary" onclick="clearResults()">
+          <span>🗑</span> Clear
+        </button>
+        <button class="btn-secondary" onclick="rerunOCR()">
+          <span>🔄</span> Retry
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 7: Instructions ═══ -->
+  <div class="card mb-4 overflow-hidden">
+    <button class="w-full p-4 flex items-center justify-between text-left" onclick="toggleInstructions()">
+      <span class="card-title">📖 របៀបប្រើ / How to Use</span>
+      <svg class="accordion-arrow w-4 h-4 text-gold-400" id="instrArrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+    <div class="accordion-content" id="instrContent">
+      <div class="px-4 pb-4 text-sm text-slate-300 space-y-3">
+        <div class="border-l-2 border-gold pl-3">
+          <p class="font-semibold text-white mb-1">🇰🇭 ភាសាខ្មែរ</p>
+          <ol class="list-decimal list-inside space-y-1 text-xs text-slate-400">
+            <li>ជ្រើស OCR Engine: Local (offline) ឬ Cloud (ត្រូវការ internet)</li>
+            <li>ជ្រើស Preprocessing – High Contrast ល្អបំផុតសម្រាប់ Khmer</li>
+            <li>ចុច "បើកកាមេរ៉ា" ឬ Upload រូបភាព</li>
+            <li>ចុច "ថតរូប" ដើម្បីថតឯកសារ</li>
+            <li>ចុច "ស្កែនអត្ថបទ" ដើម្បីទទួលបានអក្សរ</li>
+            <li>Copy លទ្ធផល ហើយប្រើប្រាស់</li>
+          </ol>
+        </div>
+        <div class="border-l-2 border-slate-600 pl-3">
+          <p class="font-semibold text-white mb-1">🇬🇧 English</p>
+          <ol class="list-decimal list-inside space-y-1 text-xs text-slate-400">
+            <li>Choose engine: Local OCR (offline) or Cloud OCR (needs internet)</li>
+            <li>Select preprocessing – High Contrast recommended for Khmer</li>
+            <li>Open camera or upload an image</li>
+            <li>Capture photo of your document</li>
+            <li>Click "Run OCR" to extract text</li>
+            <li>Copy the result and use it anywhere</li>
+          </ol>
+        </div>
+        <div class="bg-navy-dark rounded-lg p-3 text-xs text-slate-400 border border-gold/10">
+          <p class="text-gold-400 font-semibold mb-1" style="color:var(--gold-light)">ℹ️ Tips for best results:</p>
+          <ul class="space-y-0.5">
+            <li>• Good lighting is essential / ពន្លឺចំាបាច់ណាស់</li>
+            <li>• Hold camera steady / ហោះស្ថិរ</li>
+            <li>• Text should fill the frame / អក្សរត្រូវឲ្យច្បាស់</li>
+            <li>• Use High Contrast for faded text / ប្រើ High Contrast</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center text-xs text-slate-600 py-4 border-t border-white/5">
+    <p class="mb-1">Pure Front-end &bull; Optional Free Cloud API &bull; Data in RAM only</p>
+    <p>Built for Cambodia 🇰🇭 · No data leaves your device (local mode)</p>
+  </footer>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden canvas for image processing -->
+<canvas id="canvas" style="display:none"></canvas>
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const state = {
+  useCloud: false,
+  prepMode: 'normal',
+  stream: null,
+  capturedBlob: null,
+  processedDataUrl: null,
+  originalDataUrl: null,
+  tesseractWorker: null,
+  tesseractReady: false,
+  instructionsOpen: false,
+};
+
+// ═══════════════════════════════════════════════
+//  ENGINE TOGGLE
+// ═══════════════════════════════════════════════
+function toggleEngine() {
+  state.useCloud = !state.useCloud;
+  const track = document.getElementById('engineToggle');
+  track.classList.toggle('on', state.useCloud);
+  document.getElementById('cloudSettings').classList.toggle('hidden', !state.useCloud);
+
+  const badge = document.getElementById('engineBadge');
+  if (state.useCloud) {
+    badge.textContent = '☁ CLOUD';
+    badge.className = 'badge badge-cloud';
+  } else {
+    badge.textContent = '⚙ LOCAL';
+    badge.className = 'badge badge-local';
+    // Pre-init tesseract if not done
+    if (!state.tesseractReady && !state.tesseractWorker) {
+      initTesseract();
     }
+  }
+}
 
-    // Start Camera
-    async function startCamera() {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 } }
-        });
-        video.srcObject = stream;
-        await video.play();
-        cameraContainer.classList.remove('hidden');
-        startBtn.classList.add('hidden');
-      } catch (err) {
-        console.error(err);
-        alert("មិនអាចបើកកាមេរ៉ាបានទេ។ សូមផ្តល់សិទ្ធិកាមេរ៉ា។");
-      }
+// ═══════════════════════════════════════════════
+//  PREPROCESSING
+// ═══════════════════════════════════════════════
+function setPrep(mode) {
+  state.prepMode = mode;
+  document.querySelectorAll('.prep-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+}
+
+function applyPreprocessing(canvas, ctx, mode) {
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  if (mode === 'highcontrast') {
+    // Grayscale + high contrast
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+      // Aggressive threshold for Khmer text clarity
+      const val = gray < 128 ? 0 : 255;
+      data[i] = data[i+1] = data[i+2] = val;
     }
-
-    function stopCamera() {
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-        stream = null;
-      }
-      cameraContainer.classList.add('hidden');
-      startBtn.classList.remove('hidden');
+  } else if (mode === 'clean') {
+    // Grayscale + adaptive brightness boost
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+      const enhanced = Math.min(255, Math.max(0, (gray - 100) * 1.8 + 100));
+      const val = enhanced > 160 ? 255 : enhanced < 80 ? 0 : enhanced;
+      data[i] = data[i+1] = data[i+2] = val;
     }
+  }
+  // normal: no change
+  ctx.putImageData(imageData, 0, 0);
+}
 
-    // Preprocess image (optimized for Khmer)
-    function preprocessImage(sourceImg) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+// ═══════════════════════════════════════════════
+//  CAMERA
+// ═══════════════════════════════════════════════
+async function openCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    state.stream = stream;
+    const video = document.getElementById('videoEl');
+    video.srcObject = stream;
+    video.style.display = 'block';
+    document.getElementById('cameraPlaceholder').style.display = 'none';
+    document.getElementById('cameraOverlay').style.display = 'block';
+    document.getElementById('cameraBox').classList.add('camera-live');
+    document.getElementById('btnOpenCam').classList.add('hidden');
+    document.getElementById('btnCapture').classList.remove('hidden');
+    document.getElementById('btnStopCam').classList.remove('hidden');
+  } catch (err) {
+    showError('Camera access denied / បដិសេធការចូលប្រើ Camera', err.message);
+  }
+}
 
-      // Upscale moderately for better OCR without killing performance
-      canvas.width = sourceImg.width * 1.6;
-      canvas.height = sourceImg.height * 1.6;
+function stopCamera() {
+  if (state.stream) {
+    state.stream.getTracks().forEach(t => t.stop());
+    state.stream = null;
+  }
+  const video = document.getElementById('videoEl');
+  video.srcObject = null;
+  video.style.display = 'none';
+  document.getElementById('cameraPlaceholder').style.display = 'flex';
+  document.getElementById('cameraOverlay').style.display = 'none';
+  document.getElementById('cameraBox').classList.remove('camera-live');
+  document.getElementById('btnOpenCam').classList.remove('hidden');
+  document.getElementById('btnCapture').classList.add('hidden');
+  document.getElementById('btnStopCam').classList.add('hidden');
+}
 
-      ctx.drawImage(sourceImg, 0, 0, canvas.width, canvas.height);
+function capturePhoto() {
+  const video = document.getElementById('videoEl');
+  const canvas = document.getElementById('canvas');
+  canvas.width = video.videoWidth || 1280;
+  canvas.height = video.videoHeight || 720;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
 
-      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      const mode = preprocessMode.value;
+  state.originalDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+  document.getElementById('imgOriginal').src = state.originalDataUrl;
 
-      for (let i = 0; i < data.length; i += 4) {
-        let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+  // Apply preprocessing
+  applyPreprocessing(canvas, ctx, state.prepMode);
+  state.processedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+  document.getElementById('imgProcessed').src = state.processedDataUrl;
 
-        if (mode === 'highcontrast') {
-          gray = (gray - 70) * 2.0;
-        } else if (mode === 'clean') {
-          gray = (gray - 50) * 1.6;
-        } else {
-          gray = (gray - 40) * 1.4;
+  canvas.toBlob(blob => { state.capturedBlob = blob; }, 'image/jpeg', 0.95);
+
+  document.getElementById('previewSection').classList.remove('hidden');
+  stopCamera();
+  showToast('✅ ថតរូបបានជោគជ័យ · Photo captured!');
+}
+
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.getElementById('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      state.originalDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      document.getElementById('imgOriginal').src = state.originalDataUrl;
+
+      applyPreprocessing(canvas, ctx, state.prepMode);
+      state.processedDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      document.getElementById('imgProcessed').src = state.processedDataUrl;
+
+      canvas.toBlob(blob => { state.capturedBlob = blob; }, 'image/jpeg', 0.95);
+
+      document.getElementById('previewSection').classList.remove('hidden');
+      showToast('🖼 Upload successful / Upload បានជោគជ័យ');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+// ═══════════════════════════════════════════════
+//  TESSERACT INIT
+// ═══════════════════════════════════════════════
+async function initTesseract() {
+  if (state.tesseractWorker) return;
+  setLoading(true, 'កំពុងបញ្ចូល Tesseract…', 'Loading Tesseract engine…');
+  try {
+    const worker = await Tesseract.createWorker('khm', 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          const pct = Math.round(m.progress * 100);
+          document.getElementById('loadingMsg').textContent = `ស្កែន ${pct}%…`;
+          document.getElementById('loadingMsgEn').textContent = `Recognizing text ${pct}%…`;
+        } else if (m.status) {
+          document.getElementById('loadingMsgEn').textContent = m.status;
         }
-
-        gray = Math.max(0, Math.min(255, gray));
-        data[i] = data[i + 1] = data[i + 2] = gray;
       }
+    });
+    state.tesseractWorker = worker;
+    state.tesseractReady = true;
+    setLoading(false);
+  } catch (err) {
+    setLoading(false);
+    showError('Tesseract load failed', err.message);
+  }
+}
 
-      ctx.putImageData(imageData, 0, 0);
+// ═══════════════════════════════════════════════
+//  OCR
+// ═══════════════════════════════════════════════
+async function runOCR() {
+  if (!state.processedDataUrl && !state.capturedBlob) {
+    showToast('⚠️ Please capture or upload an image first!');
+    return;
+  }
 
-      const processed = new Image();
-      processed.src = canvas.toDataURL('image/jpeg', 0.92); // jpeg slightly faster
-      return { processed, canvas };
+  if (state.useCloud) {
+    await runCloudOCR();
+  } else {
+    await runLocalOCR();
+  }
+}
+
+async function rerunOCR() {
+  clearResults(false);
+  await runOCR();
+}
+
+async function runLocalOCR() {
+  setLoading(true, 'កំពុងដំណើរការ OCR…', 'Running local Tesseract OCR…');
+  try {
+    if (!state.tesseractWorker) {
+      await initTesseract();
+    }
+    if (!state.tesseractWorker) return;
+
+    const { data } = await state.tesseractWorker.recognize(state.processedDataUrl);
+    setLoading(false);
+
+    const text = data.text.trim();
+    showResult(text || '(No text detected / មិនរកឃើញអក្សរ)', '⚙ LOCAL', data.confidence);
+  } catch (err) {
+    setLoading(false);
+    showError('Local OCR failed', err.message);
+  }
+}
+
+async function runCloudOCR() {
+  setLoading(true, 'កំពុងផ្ញើទៅ Cloud…', 'Sending to OCR.space cloud…');
+  try {
+    const apiKey = document.getElementById('apiKeyInput').value.trim() || 'helloworld';
+    const base64 = state.processedDataUrl;
+
+    const formData = new FormData();
+    formData.append('base64Image', base64);
+    formData.append('language', 'kmr');
+    formData.append('isOverlayRequired', 'false');
+    formData.append('scale', 'true');
+    formData.append('OCREngine', '2');
+    formData.append('apikey', apiKey);
+
+    const res = await fetch('https://api.ocr.space/parse/image', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    setLoading(false);
+
+    if (json.IsErroredOnProcessing) {
+      throw new Error(json.ErrorMessage?.join(', ') || 'OCR.space error');
     }
 
-    // Main Scan Function
-    async function scanImage(capturedImg) {
-      loading.classList.remove('hidden');
-      resultBox.classList.add('hidden');
+    const parsed = json.ParsedResults?.[0];
+    const text = parsed?.ParsedText?.trim() || '(No text detected)';
+    showResult(text, '☁ CLOUD', null);
+  } catch (err) {
+    setLoading(false);
+    showError('Cloud OCR failed – check network or API key / ពិនិត្យ Network ឬ API Key', err.message);
+  }
+}
 
-      try {
-        const w = await initTesseract();
+// ═══════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════
+function setLoading(show, msgKm = '', msgEn = '') {
+  document.getElementById('loadingSection').classList.toggle('hidden', !show);
+  document.getElementById('btnRunOCR').disabled = show;
+  if (show) {
+    document.getElementById('loadingMsg').textContent = msgKm;
+    document.getElementById('loadingMsgEn').textContent = msgEn;
+    document.getElementById('resultSection').classList.add('hidden');
+  }
+}
 
-        const { processed, canvas } = preprocessImage(capturedImg);
-        originalImg.src = capturedImg.src;
-        processedImg.src = processed.src;
+function showResult(text, engine, confidence) {
+  document.getElementById('ocrText').textContent = text;
+  document.getElementById('resultSection').classList.remove('hidden');
+  document.getElementById('resultSuccess').classList.remove('hidden');
 
-        statusText.textContent = "កំពុងស្កេនអក្សរខ្មែរ...";
+  const badge = document.getElementById('resultBadge');
+  if (engine.includes('CLOUD')) {
+    badge.textContent = engine;
+    badge.className = 'badge badge-cloud';
+  } else {
+    badge.textContent = engine;
+    badge.className = 'badge badge-local';
+  }
 
-        const result = await w.recognize(canvas, {
-          tessedit_pageseg_mode: '6',
-          tessedit_ocr_engine_mode: 3,
-          preserve_interword_spaces: '1',
-          tessedit_char_blacklist: '|[]{}()_~`',
-        });
+  if (confidence !== null && confidence !== undefined) {
+    const conf = Math.round(confidence);
+    document.getElementById('confSection').classList.remove('hidden');
+    document.getElementById('confValue').textContent = `${conf}%`;
+    document.getElementById('confFill').style.width = `${conf}%`;
+    const fill = document.getElementById('confFill');
+    if (conf > 70) fill.style.background = 'linear-gradient(90deg,#16a34a,#4ade80)';
+    else if (conf > 40) fill.style.background = 'linear-gradient(90deg,#b45309,#f59e0b)';
+    else fill.style.background = 'linear-gradient(90deg,#b91c1c,#f87171)';
+  } else {
+    document.getElementById('confSection').classList.add('hidden');
+  }
 
-        const text = result.data.text.trim();
+  document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
-        recognizedTextEl.textContent = text || "មិនរកឃើញអត្ថបទទេ។ សាកល្បងម្តងទៀត។";
-        resultBox.classList.remove('hidden');
+function clearResults(clearPreviews = true) {
+  document.getElementById('resultSection').classList.add('hidden');
+  document.getElementById('resultSuccess').classList.add('hidden');
+  document.getElementById('ocrText').textContent = '—';
+  document.getElementById('confSection').classList.add('hidden');
+  if (clearPreviews) {
+    document.getElementById('previewSection').classList.add('hidden');
+    state.capturedBlob = null;
+    state.processedDataUrl = null;
+    state.originalDataUrl = null;
+    document.getElementById('btnRunOCR').disabled = false;
+  }
+}
 
-      } catch (err) {
-        console.error(err);
-        recognizedTextEl.textContent = "មានបញ្ហាក្នុងការស្កេន។ សូមព្យាយាមម្តងទៀត។\nError scanning. Please try again.";
-        resultBox.classList.remove('hidden');
-      } finally {
-        loading.classList.add('hidden');
-      }
-    }
-
-    // Capture Button (Fixed)
-    captureBtn.addEventListener('click', async () => {
-      if (!video.videoWidth) {
-        alert("កាមេរ៉ាមិនដំណើរការ។ សូមព្យាយាមម្តងទៀត។");
-        return;
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d').drawImage(video, 0, 0);
-
-      const capturedImg = new Image();
-      capturedImg.src = canvas.toDataURL('image/jpeg', 0.95);
-      
-      capturedImg.onload = () => {
-        scanImage(capturedImg);
-      };
+function copyText() {
+  const text = document.getElementById('ocrText').textContent;
+  if (!text || text === '—') { showToast('⚠️ No text to copy!'); return; }
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('✅ Copied! / បានចម្លង!'))
+    .catch(() => {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('✅ Copied!');
     });
+}
 
-    // Event Listeners
-    startBtn.addEventListener('click', startCamera);
-    stopBtn.addEventListener('click', stopCamera);
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
 
-    copyBtn.addEventListener('click', () => {
-      const text = recognizedTextEl.textContent.trim();
-      if (text && !text.includes("មិនរកឃើញ")) {
-        navigator.clipboard.writeText(text).then(() => {
-          const original = copyBtn.innerHTML;
-          copyBtn.innerHTML = '✅ បានចម្លង!';
-          setTimeout(() => copyBtn.innerHTML = original, 1800);
-        });
-      }
-    });
+function showError(title, detail) {
+  document.getElementById('resultSection').classList.remove('hidden');
+  document.getElementById('ocrText').textContent = `❌ ${title}\n\n${detail || ''}`;
+  document.getElementById('confSection').classList.add('hidden');
+  const badge = document.getElementById('resultBadge');
+  badge.textContent = '✗ ERROR';
+  badge.className = 'badge badge-cloud';
+  document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+}
 
-    clearBtn.addEventListener('click', () => {
-      resultSection.classList.add('hidden');
-      resultBox.classList.add('hidden');
-      recognizedTextEl.textContent = '';
-    });
+function toggleInstructions() {
+  state.instructionsOpen = !state.instructionsOpen;
+  document.getElementById('instrContent').classList.toggle('open', state.instructionsOpen);
+  document.getElementById('instrArrow').classList.toggle('open', state.instructionsOpen);
+}
 
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-      if (worker) worker.terminate();
-      if (stream) stream.getTracks().forEach(t => t.stop());
-    });
-
-    console.log('%cKhmer OCR Scanner - Fixed version ready', 'color:#4f46e5;font-weight:bold');
-  </script>
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+(function init() {
+  // Pre-warm Tesseract in background after small delay
+  setTimeout(() => {
+    if (!state.useCloud) initTesseract();
+  }, 1500);
+})();
+</script>
 </body>
 </html>
